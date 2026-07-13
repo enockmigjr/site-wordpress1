@@ -1,0 +1,12 @@
+*
+!.gitignore
+!.gitattributes
+!.dockerignore
+!.env.example
+!README.md
+!Dockerfile
+!docker-compose.yml
+!docker/
+!docker/**
+!doc/
+!doc/**
