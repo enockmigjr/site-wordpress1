@@ -27,6 +27,11 @@ Sous Linux/macOS:
 Application: http://localhost:8080
 Mailpit: http://localhost:8025
 
+Le healthcheck Nginx utilise l'endpoint interne `/healthz` et ne suit donc pas
+les redirections WordPress. En local, `WORDPRESS_MAIL_FROM` et
+`WORDPRESS_MAIL_FROM_NAME` configurent l'expediteur global via un mu-plugin
+Docker; utilisez toujours une adresse syntaxiquement valide.
+
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
 
 ## Strategie de version

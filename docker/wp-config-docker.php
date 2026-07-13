@@ -56,6 +56,7 @@ define( 'DISALLOW_FILE_EDIT', true );
 define( 'WP_AUTO_UPDATE_CORE', 'minor' );
 define( 'FS_METHOD', 'direct' );
 define( 'WP_ENVIRONMENT_TYPE', $environment );
+define( 'WPMU_PLUGIN_DIR', '/opt/photovault/mu-plugins' );
 
 if ( $force_ssl_admin ) {
 	define( 'FORCE_SSL_ADMIN', true );

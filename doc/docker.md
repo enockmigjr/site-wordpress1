@@ -34,13 +34,21 @@ Les scripts refusent d'ecraser un fichier .env existant et generent des secrets 
 
 1. Ouvrir http://localhost:8080.
 2. Ouvrir http://localhost:8025.
-3. Envoyer une verification email ou un OTP depuis Identity Security Kit.
-4. Confirmer la reception dans Mailpit.
-5. Executer les evenements dus:
+3. Verifier le endpoint interne Nginx:
+
+       curl http://localhost:8080/healthz
+
+4. Envoyer une verification email ou un OTP depuis Identity Security Kit.
+5. Confirmer la reception dans Mailpit.
+6. Tester l'expediteur WordPress global:
+
+       docker compose exec cron wp eval "var_export(wp_mail('docker-test@example.test','Docker mail test','Mail transport is operational.'));" --allow-root
+
+7. Executer les evenements dus:
 
        docker compose exec cron wp cron event run --due-now --allow-root --path=/var/www/html
 
-6. Verifier les plugins:
+8. Verifier les plugins:
 
        docker compose exec wordpress wp plugin list --allow-root --path=/var/www/html
 
@@ -53,6 +61,8 @@ Les scripts refusent d'ecraser un fichier .env existant et generent des secrets 
 - PHP est interdit dans wp-content/uploads.
 - wp-config.php, fichiers caches, backups, dumps SQL, readme et licence ne sont pas servis.
 - wp_mail utilise msmtp vers Mailpit dans l'image locale.
+- WORDPRESS_MAIL_FROM et WORDPRESS_MAIL_FROM_NAME sont appliques par un mu-plugin Docker charge depuis /opt/photovault/mu-plugins.
+- Le healthcheck Nginx cible /healthz et ne suit pas les redirections applicatives.
 - L'editeur de fichiers WordPress est desactive.
 - WP_DEBUG ne s'affiche jamais dans les reponses HTML.
 
