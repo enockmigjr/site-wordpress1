@@ -52,6 +52,36 @@ Les scripts refusent d'ecraser un fichier .env existant et generent des secrets 
 
        docker compose exec wordpress wp plugin list --allow-root --path=/var/www/html
 
+## Sauvegarde et restauration
+
+Un snapshot contient:
+
+- `database.sql.gz`: dump MariaDB transactionnel avec routines, triggers et events;
+- `media.tar.gz`: `wp-content/uploads` et `wp-content/photovault-private`;
+- `manifest.txt`: format, date UTC, base et nombre de tables;
+- `checksums.sha256`: integrite SHA-256 des trois fichiers precedents.
+
+### PowerShell
+
+    pwsh -File docker/scripts/backup.ps1
+    pwsh -File docker/scripts/backup.ps1 -Name avant-migration
+    pwsh -File docker/scripts/restore.ps1 -Mode verify -Backup avant-migration
+    pwsh -File docker/scripts/restore.ps1 -Mode test -Backup avant-migration
+    pwsh -File docker/scripts/restore.ps1 -Mode apply -Backup avant-migration -Confirm
+
+### Linux/macOS avec Docker Compose
+
+    docker compose --profile tools run --rm backup
+    docker compose --profile tools run --rm backup avant-migration
+    docker compose --profile tools run --rm restore verify avant-migration
+    docker compose --profile tools run --rm restore test avant-migration
+
+Pour une restauration reelle hors wrapper PowerShell, arreter d'abord `nginx`, `cron` et `wordpress`, puis fournir les deux confirmations au conteneur. Le wrapper PowerShell automatise cette maintenance et doit etre prefere sous Windows.
+
+Le mode `verify` controle checksums, gzip, manifeste et chemins de l'archive. Le mode `test` importe le dump dans une base temporaire, compare le nombre de tables et extrait les medias sous `/tmp`. Le mode `apply` execute d'abord ces controles, cree un dump et une archive media `pre-restore-*`, puis applique le snapshot. Une erreur pendant l'application declenche le rollback automatique.
+
+Les dossiers `backups/` restent hors Git. En production, ajouter chiffrement, stockage hors site, retention, surveillance des echecs et tests periodiques sur une infrastructure distincte.
+
 ## Securite
 
 - Les ports HTTP et Mailpit sont lies a 127.0.0.1 en developpement.
@@ -71,3 +101,4 @@ Les scripts refusent d'ecraser un fichier .env existant et generent des secrets 
 - Le moteur Docker doit etre actif pour le build et les tests bout-en-bout.
 - La branche WordPress 7.0 de l'image applique les correctifs de maintenance; le coeur XAMPP local doit aussi etre mis a jour separement.
 - Cette configuration monte le projet local pour le developpement. Une image de production immutable necessitera les URLs distantes ou un registre d'artefacts pour les quatre depots applicatifs.
+- Les outils de backup valident le flux local; la rotation, le chiffrement et la copie hors site dependent encore de l'environnement de production.

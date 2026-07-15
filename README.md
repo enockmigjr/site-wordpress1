@@ -34,6 +34,23 @@ Docker; utilisez toujours une adresse syntaxiquement valide.
 
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
 
+## Sauvegarde et restauration
+
+Creer un snapshot atomique MariaDB + uploads + originaux prives:
+
+    pwsh -File docker/scripts/backup.ps1
+
+Verifier puis tester la restauration sans toucher au site actif:
+
+    pwsh -File docker/scripts/restore.ps1 -Mode verify -Backup photovault-YYYYMMDDTHHMMSSZ
+    pwsh -File docker/scripts/restore.ps1 -Mode test -Backup photovault-YYYYMMDDTHHMMSSZ
+
+Appliquer une restauration reelle exige une confirmation. Le wrapper suspend les services web/cron actifs, cree des fichiers de rollback, restaure puis redemarre les memes services:
+
+    pwsh -File docker/scripts/restore.ps1 -Mode apply -Backup photovault-YYYYMMDDTHHMMSSZ -Confirm
+
+Les snapshots sous `backups/` sont ignores par Git. Copiez-les vers un stockage chiffre hors machine avec une politique de retention adaptee.
+
 ## Strategie de version
 
 Le depot racine suit les fichiers d'infrastructure. Chaque depot applicatif conserve son propre historique et doit etre committe separement lorsqu'il est modifie.

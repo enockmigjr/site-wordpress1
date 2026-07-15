@@ -114,5 +114,42 @@ services:
       timeout: 15s
       retries: 3
 
+  backup:
+    image: mariadb:11.4
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PHOTOVAULT_DB_HOST: db
+      PHOTOVAULT_DB_NAME: ${WORDPRESS_DB_NAME:-photovault}
+      PHOTOVAULT_DB_USER: ${WORDPRESS_DB_USER:-photovault}
+      PHOTOVAULT_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?Set WORDPRESS_DB_PASSWORD in .env}
+    volumes:
+      - ./backups:/backups
+      - ./wp-content/uploads:/source/uploads:ro
+      - ./wp-content/photovault-private:/source/photovault-private:ro
+      - ./docker/backup/backup.sh:/usr/local/bin/photovault-backup:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/photovault-backup"]
+
+  restore:
+    image: mariadb:11.4
+    profiles: ["tools"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PHOTOVAULT_DB_HOST: db
+      PHOTOVAULT_DB_NAME: ${WORDPRESS_DB_NAME:-photovault}
+      PHOTOVAULT_DB_USER: ${WORDPRESS_DB_USER:-photovault}
+      PHOTOVAULT_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?Set WORDPRESS_DB_PASSWORD in .env}
+      PHOTOVAULT_DB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+    volumes:
+      - ./backups:/backups
+      - ./wp-content/uploads:/restore/uploads
+      - ./wp-content/photovault-private:/restore/photovault-private
+      - ./docker/backup/restore.sh:/usr/local/bin/photovault-restore:ro
+    entrypoint: ["/bin/sh", "/usr/local/bin/photovault-restore"]
+
 volumes:
   photovault-db:
