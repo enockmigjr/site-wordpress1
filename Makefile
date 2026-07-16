@@ -3,12 +3,13 @@ ENV_FILE ?= .env
 WAIT_TIMEOUT ?= 180
 BACKUP ?=
 WP_ARGS ?= help
+PUBLIC_URL ?=
 
 COMPOSE_RUN = $(COMPOSE) --env-file $(ENV_FILE)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help init secrets config build deploy verify status logs restart stop down cron wp backup restore-verify restore-test provider-status
+.PHONY: help init secrets config build deploy verify status logs restart stop down cron wp backup restore-verify restore-test provider-status production-preflight
 
 help:
 	@echo "PhotoVault Docker"
@@ -26,6 +27,7 @@ help:
 	@echo "  make cron             Run due WordPress cron events"
 	@echo "  make wp WP_ARGS='...' Run a WP-CLI command"
 	@echo "  make provider-status  Check Twilio and Resend configuration without secrets"
+	@echo "  make production-preflight PUBLIC_URL=https://..."
 	@echo "  make backup           Create a database and media snapshot"
 	@echo "  make restore-verify BACKUP=name"
 	@echo "  make restore-test BACKUP=name"
@@ -59,6 +61,11 @@ verify: config
 
 provider-status: config
 	$(COMPOSE_RUN) exec -T wordpress wp --allow-root eval-file /var/www/html/docker/scripts/provider-status.php --path=/var/www/html
+
+production-preflight: verify
+	@test -n "$(PUBLIC_URL)" || (echo "PUBLIC_URL is required (https://...)." >&2; exit 1)
+	$(COMPOSE_RUN) exec -T -e PHOTOVAULT_REQUIRE_LIVE_PROVIDERS=1 wordpress wp --allow-root eval-file /var/www/html/docker/scripts/provider-status.php --path=/var/www/html
+	$(COMPOSE_RUN) exec -T wordpress sh /var/www/html/docker/scripts/public-preflight.sh "$(PUBLIC_URL)"
 
 status:
 	$(COMPOSE_RUN) ps

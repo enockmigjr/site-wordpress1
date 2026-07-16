@@ -50,12 +50,15 @@ Commandes d'exploitation courantes:
     make logs
     make verify
     make provider-status
+    make production-preflight PUBLIC_URL=https://photos.example.com
     make cron
     make wp WP_ARGS="option get home"
     make restart
     make stop
 
 `make down` retire les conteneurs et le reseau mais conserve le volume MariaDB. Ne pas ajouter `-v` sauf si la suppression definitive de la base est voulue et sauvegardee.
+
+`make production-preflight PUBLIC_URL=https://...` refuse les credentials Twilio de test, un expediteur Resend local ou `resend.dev`, une URL WordPress non HTTPS et l'absence de HSTS, CSP, `X-Content-Type-Options` ou `Referrer-Policy`. Il n'affiche aucune cle. Un resultat vert signifie que la configuration est candidate a la recette live; la reception physique du SMS et les resultats SPF/DKIM/DMARC dans le message recu restent obligatoires.
 
 Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas installe, les commandes Docker Compose equivalentes ci-dessous restent valides depuis PowerShell.
 
@@ -173,6 +176,7 @@ Cette pile convient a un serveur Docker mono-hote disposant du checkout complet 
 5. Placer Nginx derriere un reverse proxy TLS; conserver le port PhotoVault lie a `127.0.0.1` lorsque le proxy se trouve sur le meme hote.
 6. Configurer DNS, HTTPS, `home` et `siteurl`, puis utiliser un expediteur Resend verifie avec SPF et DKIM.
 7. Executer `make deploy`, `make verify`, `make provider-status` et un test reel email/SMS.
-8. Creer `make backup`, copier le snapshot vers un stockage chiffre hors hote et tester une restauration.
+8. Executer `make production-preflight PUBLIC_URL=https://votre-domaine.example` et corriger chaque controle en echec.
+9. Creer `make backup`, copier le snapshot vers un stockage chiffre hors hote et tester une restauration.
 
 Le deploiement n'est considere termine que lorsque tous les services sont `healthy`, la verification applicative passe, les URL HTTPS publiques repondent, les taches cron s'executent et les sauvegardes sont restaurees sur un environnement isole.

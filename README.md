@@ -42,7 +42,7 @@ Docker; utilisez toujours une adresse syntaxiquement valide.
 
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
 
-Les credentials Twilio et Resend sont places dans `docker/wp-config-secrets.php`, jamais dans le Makefile, le fichier exemple ou l'historique Git. `make provider-status` indique uniquement si chaque constante est renseignee.
+Les credentials Twilio et Resend sont places dans `docker/wp-config-secrets.php`, jamais dans le Makefile, le fichier exemple ou l'historique Git. `make provider-status` indique uniquement si chaque constante est renseignee. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example` refuse les providers de test, une home non HTTPS et les principaux en-tetes publics manquants avant la recette de reception reelle.
 
 ## Sauvegarde et restauration
 
