@@ -99,6 +99,12 @@ Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas
 - Resend: `onboarding@resend.dev` et `delivered+photovault@resend.dev` permettent une simulation sans reputation de domaine. Cette preuve valide l'API, mais ne remplace pas la recette d'un expediteur sur domaine verifie avec SPF et DKIM.
 - Pour une livraison reelle, remplacer les credentials de test par des credentials live, utiliser un expediteur provisionne chez Twilio et un domaine verifie chez Resend, puis confirmer la reception sur les destinations de recette.
 
+Etat valide le 2026-07-16:
+
+- Twilio Test Credentials accepte le diagnostic et la creation d'un challenge OTP SMS complet. Aucun SMS physique n'est attendu dans ce mode.
+- Resend confirme le diagnostic `delivered`; une campagne temporaire a egalement traverse la queue et atteint le statut `sent` via l'adresse sure du provider avant nettoyage.
+- La recette de production devra repeter ces parcours avec un numero Twilio live et un expediteur Resend sur domaine SPF/DKIM verifie.
+
 ## Sauvegarde et restauration
 
 Un snapshot contient:
