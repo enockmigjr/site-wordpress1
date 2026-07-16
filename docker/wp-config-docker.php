@@ -66,4 +66,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }
 
+$local_secrets_file = __DIR__ . '/docker/wp-config-secrets.php';
+if ( is_readable( $local_secrets_file ) ) {
+	require $local_secrets_file;
+}
+
 require_once ABSPATH . 'wp-settings.php';

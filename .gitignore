@@ -8,5 +8,6 @@
 !docker-compose.yml
 !docker/
 !docker/**
+docker/wp-config-secrets.php
 !doc/
 !doc/**

@@ -2,3 +2,4 @@
 !Dockerfile
 !docker/
 !docker/**
+docker/wp-config-secrets.php

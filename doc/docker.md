@@ -23,6 +23,16 @@ Linux/macOS:
 
 Les scripts refusent d'ecraser un fichier .env existant et generent des secrets cryptographiquement aleatoires.
 
+### Secrets Twilio et Resend dans wp-config
+
+Le `wp-config.php` du conteneur est fourni par `docker/wp-config-docker.php`. Pour conserver les cles provider dans la configuration WordPress sans les versionner:
+
+```powershell
+Copy-Item docker/wp-config-secrets.example.php docker/wp-config-secrets.php
+```
+
+Renseigner ensuite les quatre constantes dans `docker/wp-config-secrets.php`. Ce fichier local est charge automatiquement avant WordPress, ignore par Git et par le contexte de build, et son dossier est inaccessible via Nginx. Ne jamais renseigner les valeurs reelles dans le fichier `.example.php`.
+
 ## Validation et demarrage
 
     docker compose config --quiet
