@@ -1,5 +1,7 @@
 # Environnement Docker PhotoVault
 
+Le guide d'exploitation et de production canonique est `doc/GUIDE-DEVOPS-COMPLET.md`. Le present document explique surtout l'environnement Docker local et ses composants.
+
 L'environnement local utilise Nginx, WordPress PHP-FPM, MariaDB, Mailpit, WP-CLI et un runner cron.
 
 ## Versions et responsabilites
@@ -58,7 +60,7 @@ Commandes d'exploitation courantes:
 
 `make down` retire les conteneurs et le reseau mais conserve le volume MariaDB. Ne pas ajouter `-v` sauf si la suppression definitive de la base est voulue et sauvegardee.
 
-`make production-preflight PUBLIC_URL=https://...` refuse les credentials Twilio de test, un expediteur Resend local ou `resend.dev`, une URL WordPress non HTTPS et l'absence de HSTS, CSP, `X-Content-Type-Options` ou `Referrer-Policy`. Il n'affiche aucune cle. Un resultat vert signifie que la configuration est candidate a la recette live; la reception physique du SMS et les resultats SPF/DKIM/DMARC dans le message recu restent obligatoires.
+`make production-preflight PUBLIC_URL=https://...` refuse les credentials Twilio de test, un expediteur Resend local ou `resend.dev`, Mailpit comme transport transactionnel, une URL WordPress non HTTPS et l'absence de HSTS, CSP, `X-Content-Type-Options` ou `Referrer-Policy`. Il n'affiche aucune cle. Un resultat vert signifie que la configuration est candidate a la recette live; la reception physique du SMS et les resultats SPF/DKIM/DMARC dans le message recu restent obligatoires.
 
 Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas installe, les commandes Docker Compose equivalentes ci-dessous restent valides depuis PowerShell.
 
@@ -153,6 +155,7 @@ Les dossiers `backups/` restent hors Git. En production, ajouter chiffrement, st
 - PHP est interdit dans wp-content/uploads.
 - wp-config.php, fichiers caches, backups, dumps SQL, readme et licence ne sont pas servis.
 - wp_mail utilise msmtp vers Mailpit dans l'image locale.
+- Le meme transport bascule vers un SMTP externe avec `PHOTOVAULT_SMTP_MODE=smtp`; Resend utilise `smtp.resend.com`, le port 587, l'utilisateur `resend` et la cle API comme mot de passe.
 - WORDPRESS_MAIL_FROM et WORDPRESS_MAIL_FROM_NAME sont appliques par un mu-plugin Docker charge depuis /opt/photovault/mu-plugins.
 - Le healthcheck Nginx cible /healthz et ne suit pas les redirections applicatives.
 - L'editeur de fichiers WordPress est desactive.

@@ -19,7 +19,12 @@ RUN set -eux; \
     wp --info --allow-root
 
 COPY docker/php/msmtprc /etc/msmtprc
+COPY docker/php/entrypoint.sh /usr/local/bin/photovault-entrypoint
 
-RUN chmod 0644 /etc/msmtprc
+RUN chmod 0644 /etc/msmtprc \
+    && chmod 0755 /usr/local/bin/photovault-entrypoint
 
 WORKDIR /var/www/html
+
+ENTRYPOINT ["photovault-entrypoint"]
+CMD ["php-fpm"]

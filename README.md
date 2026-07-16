@@ -2,6 +2,8 @@
 
 Ce depot racine versionne uniquement l'environnement Docker et sa documentation. Le coeur WordPress, les uploads, les plugins tiers et les quatre depots applicatifs sont volontairement ignores.
 
+Le runbook canonique, depuis le choix du serveur jusqu'au rollback, est `doc/GUIDE-DEVOPS-COMPLET.md`.
+
 Depots applicatifs independants:
 
 - wp-content/themes/PhotoVault
@@ -42,7 +44,7 @@ Docker; utilisez toujours une adresse syntaxiquement valide.
 
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
 
-Les credentials Twilio et Resend sont places dans `docker/wp-config-secrets.php`, jamais dans le Makefile, le fichier exemple ou l'historique Git. `make provider-status` indique uniquement si chaque constante est renseignee. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example` refuse les providers de test, une home non HTTPS et les principaux en-tetes publics manquants avant la recette de reception reelle.
+Les credentials Twilio et Resend API sont places dans `docker/wp-config-secrets.php`; le SMTP transactionnel est configure dans `.env`. Aucun secret ne doit entrer dans le Makefile, un fichier exemple ou Git. `make provider-status` indique l'etat sans afficher les valeurs. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example` refuse les providers de test, Mailpit, une home non HTTPS et les principaux en-tetes publics manquants avant la recette de reception reelle.
 
 ## Sauvegarde et restauration
 
