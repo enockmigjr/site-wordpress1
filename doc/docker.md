@@ -95,7 +95,7 @@ Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas
 
 ### Recette avec credentials de test
 
-- Twilio: la paire doit provenir de la section **Test credentials** du meme compte et `IDENTITY_SECURITY_TWILIO_FROM` doit valoir `+15005550006`. Cette recette simule l'acceptation sans remettre de SMS ni facturer le compte. Un code `21659` avec ce numero indique que le SID/token charge se comporte comme une paire live/trial ou ne correspond pas au contexte de test attendu.
+- Twilio: la paire doit provenir de la section **Test credentials** du meme compte et `IDENTITY_SECURITY_TWILIO_FROM` doit valoir `+15005550006`. Cette recette simule l'acceptation sans remettre de SMS ni facturer le compte. Avec une paire live/trial, provisionner un vrai numero SMS Twilio et l'utiliser comme `From`; le numero magique sera refuse.
 - Resend: `onboarding@resend.dev` et `delivered+photovault@resend.dev` permettent une simulation sans reputation de domaine. Cette preuve valide l'API, mais ne remplace pas la recette d'un expediteur sur domaine verifie avec SPF et DKIM.
 - Pour une livraison reelle, remplacer les credentials de test par des credentials live, utiliser un expediteur provisionne chez Twilio et un domaine verifie chez Resend, puis confirmer la reception sur les destinations de recette.
 
