@@ -35,9 +35,36 @@ Renseigner ensuite les quatre constantes dans `docker/wp-config-secrets.php`. Ce
 
 ## Validation et demarrage
 
+### Avec GNU Make
+
+Le `Makefile` est l'interface recommandee sous Linux, macOS, WSL ou Git Bash avec GNU Make:
+
+    make init
+    make deploy
+
+`make deploy` valide la configuration, construit les images, demarre les services avec attente des healthchecks, puis confirme que WordPress est installe, que le theme PhotoVault est actif et que les trois plugins applicatifs sont actifs.
+
+Commandes d'exploitation courantes:
+
+    make status
+    make logs
+    make verify
+    make provider-status
+    make cron
+    make wp WP_ARGS="option get home"
+    make restart
+    make stop
+
+`make down` retire les conteneurs et le reseau mais conserve le volume MariaDB. Ne pas ajouter `-v` sauf si la suppression definitive de la base est voulue et sauvegardee.
+
+Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas installe, les commandes Docker Compose equivalentes ci-dessous restent valides depuis PowerShell.
+
+### Sans GNU Make
+
     docker compose config --quiet
-    docker compose up --build -d
+    docker compose up --build -d --remove-orphans --wait --wait-timeout 180
     docker compose ps
+    docker compose exec -T wordpress wp --allow-root core is-installed --path=/var/www/html
     docker compose logs --tail=100 wordpress nginx db mailpit cron
 
 ## Verification fonctionnelle
@@ -62,6 +89,10 @@ Renseigner ensuite les quatre constantes dans `docker/wp-config-secrets.php`. Ce
 
        docker compose exec wordpress wp plugin list --allow-root --path=/var/www/html
 
+9. Verifier la configuration des providers sans afficher les secrets:
+
+       make provider-status
+
 ## Sauvegarde et restauration
 
 Un snapshot contient:
@@ -78,6 +109,12 @@ Un snapshot contient:
     pwsh -File docker/scripts/restore.ps1 -Mode verify -Backup avant-migration
     pwsh -File docker/scripts/restore.ps1 -Mode test -Backup avant-migration
     pwsh -File docker/scripts/restore.ps1 -Mode apply -Backup avant-migration -Confirm
+
+### GNU Make
+
+    make backup
+    make restore-verify BACKUP=avant-migration
+    make restore-test BACKUP=avant-migration
 
 ### Linux/macOS avec Docker Compose
 
@@ -112,3 +149,18 @@ Les dossiers `backups/` restent hors Git. En production, ajouter chiffrement, st
 - La branche WordPress 7.0 de l'image applique les correctifs de maintenance; le coeur XAMPP local doit aussi etre mis a jour separement.
 - Cette configuration monte le projet local pour le developpement. Une image de production immutable necessitera les URLs distantes ou un registre d'artefacts pour les quatre depots applicatifs.
 - Les outils de backup valident le flux local; la rotation, le chiffrement et la copie hors site dependent encore de l'environnement de production.
+
+## Deploiement sur un serveur
+
+Cette pile convient a un serveur Docker mono-hote disposant du checkout complet du projet. Avant une exposition publique:
+
+1. Installer Docker Engine, le plugin Docker Compose, Git et GNU Make.
+2. Cloner le depot racine et les quatre depots applicatifs a leurs chemins documentes dans le README.
+3. Executer `make init`, puis remplacer `PHOTOVAULT_ENV=development`, `WORDPRESS_DEBUG=1` et les ports locaux par les valeurs de recette ou production adaptees.
+4. Renseigner `docker/wp-config-secrets.php` sans committer ce fichier; utiliser idealement un gestionnaire de secrets et un montage en lecture seule sur le serveur.
+5. Placer Nginx derriere un reverse proxy TLS; conserver le port PhotoVault lie a `127.0.0.1` lorsque le proxy se trouve sur le meme hote.
+6. Configurer DNS, HTTPS, `home` et `siteurl`, puis utiliser un expediteur Resend verifie avec SPF et DKIM.
+7. Executer `make deploy`, `make verify`, `make provider-status` et un test reel email/SMS.
+8. Creer `make backup`, copier le snapshot vers un stockage chiffre hors hote et tester une restauration.
+
+Le deploiement n'est considere termine que lorsque tous les services sont `healthy`, la verification applicative passe, les URL HTTPS publiques repondent, les taches cron s'executent et les sauvegardes sont restaurees sur un environnement isole.

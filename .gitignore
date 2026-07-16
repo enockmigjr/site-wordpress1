@@ -5,6 +5,7 @@
 !.env.example
 !README.md
 !Dockerfile
+!Makefile
 !docker-compose.yml
 !docker/
 !docker/**

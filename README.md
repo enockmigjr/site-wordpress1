@@ -11,6 +11,14 @@ Depots applicatifs independants:
 
 ## Demarrage local
 
+Avec GNU Make sous Linux, macOS, WSL ou Git Bash:
+
+    make init
+    make deploy
+    make status
+
+Le deploiement attend les healthchecks puis verifie WordPress, le theme et les trois plugins applicatifs. `make help` affiche toutes les commandes disponibles.
+
 Sous PowerShell:
 
     pwsh -File docker/scripts/init-env.ps1
@@ -33,6 +41,8 @@ les redirections WordPress. En local, `WORDPRESS_MAIL_FROM` et
 Docker; utilisez toujours une adresse syntaxiquement valide.
 
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
+
+Les credentials Twilio et Resend sont places dans `docker/wp-config-secrets.php`, jamais dans le Makefile, le fichier exemple ou l'historique Git. `make provider-status` indique uniquement si chaque constante est renseignee.
 
 ## Sauvegarde et restauration
 
