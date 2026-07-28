@@ -9,7 +9,7 @@ COMPOSE_RUN = $(COMPOSE) --env-file $(ENV_FILE)
 
 .DEFAULT_GOAL := help
 
-.PHONY: help init secrets config build deploy verify status logs restart stop down cron wp backup restore-verify restore-test provider-status production-preflight
+.PHONY: help init secrets config build deploy verify mirrors status logs restart stop down cron wp backup restore-verify restore-test provider-status production-preflight
 
 help:
 	@echo "PhotoVault Docker"
@@ -19,6 +19,7 @@ help:
 	@echo "  make build            Build the WordPress and cron images"
 	@echo "  make deploy           Build, start, wait for health, then verify WordPress"
 	@echo "  make verify           Verify health, WordPress, theme and required plugins"
+	@echo "  make mirrors          Fail if a managed plugin differs from its theme mirror"
 	@echo "  make status           Show service state"
 	@echo "  make logs             Follow application logs"
 	@echo "  make restart          Restart application services"
@@ -57,7 +58,11 @@ verify: config
 	$(COMPOSE_RUN) exec -T wordpress wp --allow-root plugin is-active photovault-core --path=/var/www/html
 	$(COMPOSE_RUN) exec -T wordpress wp --allow-root plugin is-active identity-security-kit --path=/var/www/html
 	$(COMPOSE_RUN) exec -T wordpress wp --allow-root plugin is-active newsletter-campaign-kit --path=/var/www/html
+	$(MAKE) mirrors
 	@echo "PhotoVault deployment verified."
+
+mirrors:
+	php scripts/check-plugin-mirrors.php
 
 provider-status: config
 	$(COMPOSE_RUN) exec -T wordpress wp --allow-root eval-file /var/www/html/docker/scripts/provider-status.php --path=/var/www/html

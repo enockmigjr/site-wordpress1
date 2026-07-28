@@ -1,0 +1,17 @@
+name: Plugin mirrors
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-mirrors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - run: php scripts/check-plugin-mirrors.php

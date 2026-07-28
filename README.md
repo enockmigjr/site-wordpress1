@@ -44,6 +44,14 @@ Docker; utilisez toujours une adresse syntaxiquement valide.
 
 Le moteur Docker Desktop doit etre demarre. Ne commitez jamais le fichier .env genere.
 
+Avant un build ou une livraison, verifiez les copies integrees des plugins sans les modifier :
+
+    make mirrors
+
+Cette commande compare les contenus (chemin et SHA-256) de `photovault-core`,
+`identity-security-kit` et `newsletter-campaign-kit` avec leurs miroirs dans le
+theme. Elle fait aussi partie de `make verify` et de la CI.
+
 Les credentials Twilio et Resend API sont places dans `docker/wp-config-secrets.php`; le SMTP transactionnel est configure dans `.env`. Aucun secret ne doit entrer dans le Makefile, un fichier exemple ou Git. `make provider-status` indique l'etat sans afficher les valeurs. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example` refuse les providers de test, Mailpit, une home non HTTPS et les principaux en-tetes publics manquants avant la recette de reception reelle.
 
 ## Sauvegarde et restauration

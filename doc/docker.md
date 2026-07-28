@@ -51,6 +51,7 @@ Commandes d'exploitation courantes:
     make status
     make logs
     make verify
+    make mirrors
     make provider-status
     make production-preflight PUBLIC_URL=https://photos.example.com
     make cron
@@ -59,6 +60,8 @@ Commandes d'exploitation courantes:
     make stop
 
 `make down` retire les conteneurs et le reseau mais conserve le volume MariaDB. Ne pas ajouter `-v` sauf si la suppression definitive de la base est voulue et sauvegardee.
+
+`make mirrors` est un controle local et CI non destructif : il compare chaque plugin gere avec sa copie integree au theme. Corriger la source et synchroniser explicitement le miroir avant de relancer la commande ; elle ne copie ni ne supprime de fichier.
 
 `make production-preflight PUBLIC_URL=https://...` refuse les credentials Twilio de test, un expediteur Resend local ou `resend.dev`, Mailpit comme transport transactionnel, une URL WordPress non HTTPS et l'absence de HSTS, CSP, `X-Content-Type-Options` ou `Referrer-Policy`. Il n'affiche aucune cle. Un resultat vert signifie que la configuration est candidate a la recette live; la reception physique du SMS et les resultats SPF/DKIM/DMARC dans le message recu restent obligatoires.
 
