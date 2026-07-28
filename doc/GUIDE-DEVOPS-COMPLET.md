@@ -401,6 +401,44 @@ docker system df
 
 Ne jamais utiliser `docker compose down -v` en production: `-v` supprime le volume MariaDB.
 
+### Planificateur WordPress sans Docker
+
+Sur une installation PHP-FPM/Apache classique, ne pas laisser les campagnes,
+OTP, nettoyages et rappels dependre du trafic web. Ajouter dans `wp-config.php`
+avant la ligne `stop editing`:
+
+```php
+define( 'DISABLE_WP_CRON', true );
+```
+
+Installer WP-CLI dans `/usr/local/bin/wp`, puis donner au compte du serveur web
+la lecture de WordPress et l'ecriture des repertoires applicatifs prevus. Creer
+le cron sous ce meme compte pour eviter des fichiers appartenant a `root`:
+
+```bash
+sudo -u www-data crontab -e
+```
+
+Exemple pour un WordPress installe dans `/srv/photovault/public`:
+
+```cron
+* * * * * /usr/bin/flock -n /tmp/photovault-wp-cron.lock /bin/sh -c 'cd /srv/photovault/public && /usr/local/bin/wp cron event run --due-now --quiet --path=/srv/photovault/public' >> /srv/photovault/shared/logs/wp-cron.log 2>&1
+```
+
+Le verrou interdit deux executions simultanees. Le journal doit appartenir a
+`www-data` et etre soumis a `logrotate`. Verifier apres installation:
+
+```bash
+sudo -u www-data /usr/local/bin/wp cron event list --path=/srv/photovault/public
+sudo -u www-data /usr/local/bin/wp cron event run --due-now --path=/srv/photovault/public
+tail -n 100 /srv/photovault/shared/logs/wp-cron.log
+```
+
+Une supervision externe doit alerter si
+`newsletter_campaign_kit_run_scheduled` disparait, reste en retard au-dela du
+seuil configure ou si le journal ne change plus. Ne pas exposer publiquement
+`wp-cron.php` comme remplacement du cron systeme.
+
 ## 14. Recette apres deploiement
 
 ```bash
