@@ -10,7 +10,7 @@ Ce fichier est le runbook canonique de PhotoVault. Il couvre la presentation loc
 - Presentation locale: validee avec cinq services sains, Mailpit, WordPress, le theme et les trois plugins actifs.
 - Twilio Test Credentials et Resend `resend.dev`: valides pour la demonstration.
 - Le proprietaire accepte la livraison a 100 % pour la presentation. La reception SMS operateur et l'authentification d'un domaine email restent des activations commerciales differees, pas des fonctionnalites manquantes.
-- Le tracking d'ouverture/clic reste desactive. WordPress Multisite n'est pas utilise.
+- Le tracking first-party des ouvertures, clics et conversions est actif. Il utilise des liens signes, marque les robots connus et anonymise les evenements lors des demandes d'effacement WordPress. WordPress Multisite n'est pas utilise.
 
 ## 2. Architecture retenue
 
