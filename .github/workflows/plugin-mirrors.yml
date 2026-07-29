@@ -9,8 +9,31 @@ on:
 jobs:
   verify-mirrors:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v6
+      - name: Check out deployment repository
+        uses: actions/checkout@v6
+      - name: Check out PhotoVault theme
+        uses: actions/checkout@v6
+        with:
+          repository: enockmigjr/PhotoVault
+          path: wp-content/themes/PhotoVault
+      - name: Check out Identity Security Kit
+        uses: actions/checkout@v6
+        with:
+          repository: enockmigjr/identity-security-kit
+          path: wp-content/plugins/identity-security-kit
+      - name: Check out Newsletter Campaign Kit
+        uses: actions/checkout@v6
+        with:
+          repository: enockmigjr/newsletter-campaign-kit
+          path: wp-content/plugins/newsletter-campaign-kit
+      - name: Check out PhotoVault Core
+        uses: actions/checkout@v6
+        with:
+          repository: enockmigjr/photovault-core
+          path: wp-content/plugins/photovault-core
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
