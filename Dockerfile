@@ -1,4 +1,4 @@
-FROM wordpress:7.0-php8.2-fpm
+FROM wordpress:7.0.2-php8.5-fpm
 
 ARG WP_CLI_VERSION=2.12.0
 

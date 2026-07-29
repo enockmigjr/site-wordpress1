@@ -10,8 +10,8 @@ jobs:
   verify-mirrors:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.5'
       - run: php scripts/check-plugin-mirrors.php

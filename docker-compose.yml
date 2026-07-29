@@ -39,7 +39,7 @@ x-wordpress-volumes: &wordpress-volumes
 
 services:
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.30.4-alpine
     restart: unless-stopped
     depends_on:
       wordpress:
@@ -74,13 +74,14 @@ services:
       retries: 10
 
   db:
-    image: mariadb:11.4
+    image: mariadb:11.8.8
     restart: unless-stopped
     environment:
       MARIADB_DATABASE: ${WORDPRESS_DB_NAME:-photovault}
       MARIADB_USER: ${WORDPRESS_DB_USER:-photovault}
       MARIADB_PASSWORD: ${WORDPRESS_DB_PASSWORD:?Set WORDPRESS_DB_PASSWORD in .env}
       MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set MARIADB_ROOT_PASSWORD in .env}
+      MARIADB_AUTO_UPGRADE: "1"
     volumes:
       - photovault-db:/var/lib/mysql
     healthcheck:
@@ -90,7 +91,7 @@ services:
       retries: 10
 
   mailpit:
-    image: axllent/mailpit:v1.20
+    image: axllent/mailpit:v1.30.6
     restart: unless-stopped
     ports:
       - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
@@ -126,7 +127,7 @@ services:
       retries: 3
 
   backup:
-    image: mariadb:11.4
+    image: mariadb:11.8.8
     profiles: ["tools"]
     depends_on:
       db:
@@ -144,7 +145,7 @@ services:
     entrypoint: ["/bin/sh", "/usr/local/bin/photovault-backup"]
 
   restore:
-    image: mariadb:11.4
+    image: mariadb:11.8.8
     profiles: ["tools"]
     depends_on:
       db:
