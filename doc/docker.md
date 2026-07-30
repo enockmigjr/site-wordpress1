@@ -101,6 +101,29 @@ Sous Windows, executer le Makefile depuis WSL ou Git Bash. Si GNU Make n'est pas
 
        make provider-status
 
+## Exposition locale avec ngrok
+
+WordPress doit reconstruire ses URL avec l'origine HTTPS publique transmise par
+le proxy, tout en conservant `http://localhost:8080` pour l'acces direct. Dans
+`.env`, activer les en-tetes proxy et limiter strictement les hotes acceptes:
+
+    PHOTOVAULT_TRUST_PROXY_HEADERS=1
+    PHOTOVAULT_TRUSTED_PROXY_HOSTS=*.ngrok-free.dev
+
+Recreer ensuite les services PHP pour appliquer leur environnement:
+
+    docker compose up -d --force-recreate wordpress cron
+
+Demarrer le tunnel sans reecrire artificiellement l'en-tete `Host`:
+
+    ngrok http 8080
+
+Le domaine ngrok peut changer entre deux lancements: le suffixe autorise evite
+de modifier `home`, `siteurl` ou `.env` a chaque fois. Ne jamais utiliser `*`
+comme hote autorise. Pour un domaine stable, remplacer le joker par son nom
+exact. Le port `8080` est uniquement le port local du tunnel; il ne doit jamais
+apparaitre dans l'URL HTTPS publique.
+
 ### Recette avec credentials de test
 
 - Twilio: la paire doit provenir de la section **Test credentials** du meme compte et `IDENTITY_SECURITY_TWILIO_FROM` doit valoir `+15005550006`. Cette recette simule l'acceptation sans remettre de SMS ni facturer le compte. Avec une paire live/trial, provisionner un vrai numero SMS Twilio et l'utiliser comme `From`; le numero magique sera refuse.
