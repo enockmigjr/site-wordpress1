@@ -12,6 +12,7 @@ $plugins = array(
 	'identity-security-kit',
 	'newsletter-campaign-kit',
 	'photovault-core',
+	'trouble-ticket-connector',
 );
 
 /** @return array<string, string> */

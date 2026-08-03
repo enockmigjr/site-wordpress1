@@ -7,7 +7,7 @@ Ce fichier est le runbook canonique de PhotoVault. Il couvre la presentation loc
 ## 1. Etat de livraison
 
 - Application, theme, plugins, donnees de demonstration et environnement Docker: termines.
-- Presentation locale: validee avec cinq services sains, Mailpit, WordPress, le theme et les trois plugins actifs.
+- Presentation locale: validee avec cinq services sains, Mailpit, WordPress, le theme et les quatre plugins actifs.
 - Twilio Test Credentials et Resend `resend.dev`: valides pour la demonstration.
 - Le proprietaire accepte la livraison a 100 % pour la presentation. La reception SMS operateur et l'authentification d'un domaine email restent des activations commerciales differees, pas des fonctionnalites manquantes.
 - Le tracking first-party des ouvertures, clics et conversions est actif. Il utilise des liens signes, marque les robots connus et anonymise les evenements lors des demandes d'effacement WordPress. WordPress Multisite n'est pas utilise.
@@ -155,7 +155,7 @@ docker run --rm hello-world
 
 Reference officielle: <https://docs.docker.com/engine/install/ubuntu/>.
 
-## 7. Installation des cinq depots
+## 7. Installation des six depots
 
 ```bash
 sudo install -d -o deploy -g deploy /srv/photovault
@@ -166,6 +166,7 @@ git clone https://github.com/enockmigjr/PhotoVault.git wp-content/themes/PhotoVa
 git clone https://github.com/enockmigjr/photovault-core.git wp-content/plugins/photovault-core
 git clone https://github.com/enockmigjr/identity-security-kit.git wp-content/plugins/identity-security-kit
 git clone https://github.com/enockmigjr/newsletter-campaign-kit.git wp-content/plugins/newsletter-campaign-kit
+git clone URL_DU_DEPOT_CONNECTEUR wp-content/plugins/trouble-ticket-connector
 ```
 
 Verifier les branches et conserver les SHA de livraison:
@@ -176,9 +177,10 @@ git -C /srv/photovault/wp-content/themes/PhotoVault status --short --branch
 git -C /srv/photovault/wp-content/plugins/photovault-core status --short --branch
 git -C /srv/photovault/wp-content/plugins/identity-security-kit status --short --branch
 git -C /srv/photovault/wp-content/plugins/newsletter-campaign-kit status --short --branch
+git -C /srv/photovault/wp-content/plugins/trouble-ticket-connector status --short --branch
 ```
 
-Ne jamais deployer un worktree sale. Pour une livraison reproductible, noter les cinq SHA dans le ticket de release ou poser des tags signes.
+Ne jamais deployer un worktree sale. Pour une livraison reproductible, noter les six SHA dans le ticket de release ou poser des tags signes. Remplacer `URL_DU_DEPOT_CONNECTEUR` par le depot valide lors de sa publication ; ne jamais utiliser une archive non versionnee.
 
 ## 8. Configuration `.env`
 
@@ -291,7 +293,7 @@ photos.example.com {
 		X-Frame-Options "SAMEORIGIN"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline'; connect-src 'self' https:; upgrade-insecure-requests"
+		Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' https://support.example.com; frame-src 'self' https://support.example.com; connect-src 'self' https://support.example.com; upgrade-insecure-requests"
 		-Server
 	}
 
@@ -312,7 +314,7 @@ photos.example.com {
 }
 ```
 
-Tester la CSP sur une recette avant production; ajouter seulement les domaines externes reellement utilises. Ne pas supprimer `PHOTOVAULT_TRUST_PROXY_HEADERS=1` derriere Caddy et ne pas exposer le port 8080 publiquement.
+Remplacer `https://support.example.com` par l’origine exacte du portail support. Tester la CSP sur une recette avant production; ajouter seulement les domaines externes reellement utilises. Ne pas supprimer `PHOTOVAULT_TRUST_PROXY_HEADERS=1` derriere Caddy et ne pas exposer le port 8080 publiquement.
 
 Valider puis recharger:
 
@@ -351,7 +353,7 @@ Activer et verifier les composants si necessaire:
 
 ```bash
 make wp WP_ARGS="theme activate PhotoVault"
-make wp WP_ARGS="plugin activate photovault-core identity-security-kit newsletter-campaign-kit"
+make wp WP_ARGS="plugin activate photovault-core identity-security-kit newsletter-campaign-kit trouble-ticket-connector"
 make wp WP_ARGS="plugin list"
 make wp WP_ARGS="cron event list"
 ```
@@ -377,7 +379,7 @@ make stop
 make down
 make cron
 make provider-status
-make production-preflight PUBLIC_URL=https://photos.example.com
+make production-preflight PUBLIC_URL=https://photos.example.com SUPPORT_ORIGIN=https://support.example.com
 make wp WP_ARGS="option get home"
 make backup
 make restore-verify BACKUP=photovault-YYYYMMDDTHHMMSSZ
@@ -446,7 +448,7 @@ curl -fsS https://photos.example.com/healthz
 curl -fsSI https://photos.example.com
 make verify
 make provider-status
-make production-preflight PUBLIC_URL=https://photos.example.com
+make production-preflight PUBLIC_URL=https://photos.example.com SUPPORT_ORIGIN=https://support.example.com
 ```
 
 Verifier manuellement:
@@ -520,7 +522,7 @@ make verify
 Le script cree un snapshot pre-restauration et tente un rollback automatique en cas d'echec. Apres sinistre complet:
 
 1. Recreer le serveur et installer Docker/Caddy.
-2. Reinstaller les cinq depots aux SHA documentes.
+2. Reinstaller les six depots aux SHA documentes.
 3. Restaurer `.env` et les secrets depuis le gestionnaire de secrets.
 4. Recuperer le snapshot hors site dans `backups/`.
 5. Lancer `restore verify`, `restore test`, puis `restore apply`.
@@ -539,9 +541,10 @@ git -C wp-content/themes/PhotoVault status --short
 git -C wp-content/plugins/photovault-core status --short
 git -C wp-content/plugins/identity-security-kit status --short
 git -C wp-content/plugins/newsletter-campaign-kit status --short
+git -C wp-content/plugins/trouble-ticket-connector status --short
 ```
 
-Mettre a jour uniquement si les cinq worktrees sont propres:
+Mettre a jour uniquement si les six worktrees sont propres:
 
 ```bash
 git pull --ff-only
@@ -549,17 +552,18 @@ git -C wp-content/themes/PhotoVault pull --ff-only
 git -C wp-content/plugins/photovault-core pull --ff-only
 git -C wp-content/plugins/identity-security-kit pull --ff-only
 git -C wp-content/plugins/newsletter-campaign-kit pull --ff-only
+git -C wp-content/plugins/trouble-ticket-connector pull --ff-only
 make config
 make deploy
 make cron
 make verify
 ```
 
-Noter avant et apres les cinq SHA. Tester d'abord sur staging pour les mises a jour WordPress, PHP, MariaDB ou schemas.
+Noter avant et apres les six SHA. Tester d'abord sur staging pour les mises a jour WordPress, PHP, MariaDB ou schemas.
 
 ## 18. Rollback applicatif
 
-Si le deploiement echoue mais que les donnees sont compatibles, revenir aux cinq SHA precedents:
+Si le deploiement echoue mais que les donnees sont compatibles, revenir aux six SHA precedents:
 
 ```bash
 git checkout ROOT_SHA
@@ -567,6 +571,7 @@ git -C wp-content/themes/PhotoVault checkout THEME_SHA
 git -C wp-content/plugins/photovault-core checkout CORE_SHA
 git -C wp-content/plugins/identity-security-kit checkout IDENTITY_SHA
 git -C wp-content/plugins/newsletter-campaign-kit checkout NEWSLETTER_SHA
+git -C wp-content/plugins/trouble-ticket-connector checkout CONNECTOR_SHA
 make deploy
 make verify
 ```
@@ -621,11 +626,12 @@ Tourner immediatement un secret present dans une capture, un log, l'historique s
 - [ ] DNS A/AAAA correct et ports 80/443 ouverts.
 - [ ] SSH par cle, root et mot de passe desactives apres verification.
 - [ ] Docker officiel, service actif, socket non expose.
-- [ ] Cinq depots propres et SHA consignes.
+- [ ] Six depots propres et SHA consignes.
 - [ ] `.env` et `wp-config-secrets.php` permissions `600`.
 - [ ] `PHOTOVAULT_ENV=production`, debug desactive.
 - [ ] Backend lie uniquement a `127.0.0.1`.
 - [ ] Caddy valide, HTTPS et headers presents.
+- [ ] CSP autorise l’origine support exacte dans `script-src`, `frame-src` et `connect-src`, sans wildcard.
 - [ ] Home/site URL HTTPS et proxy headers explicitement approuves.
 - [ ] Resend SMTP pour `wp_mail`, Resend API pour les campagnes.
 - [ ] Twilio desactive ou live; jamais de simulation presentee comme livraison operateur.
@@ -634,7 +640,7 @@ Tourner immediatement un secret present dans une capture, un log, l'historique s
 - [ ] Originaux prives inaccessibles directement.
 - [ ] Sauvegarde creee, verifiee, restauree et copiee hors site.
 - [ ] Supervision externe et alertes activees.
-- [ ] Plan de rollback et cinq SHA disponibles.
+- [ ] Plan de rollback et six SHA disponibles.
 
 ## 22. Cloture
 

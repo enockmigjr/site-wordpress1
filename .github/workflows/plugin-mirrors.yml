@@ -35,7 +35,17 @@ jobs:
         with:
           repository: enockmigjr/photovault-core
           path: wp-content/plugins/photovault-core
+      - name: Install Trouble Ticket Connector distribution mirror
+        shell: bash
+        run: |
+          test -f wp-content/themes/PhotoVault/plugins/trouble-ticket-connector/trouble-ticket-connector.php
+          cp -a wp-content/themes/PhotoVault/plugins/trouble-ticket-connector wp-content/plugins/trouble-ticket-connector
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+      - name: Validate Trouble Ticket Connector
+        shell: bash
+        run: |
+          find wp-content/plugins/trouble-ticket-connector -name '*.php' -print0 | xargs -0 -n1 php -l
+          php wp-content/plugins/trouble-ticket-connector/tests/assertion-service.php
       - run: php scripts/check-plugin-mirrors.php

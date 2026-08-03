@@ -1,6 +1,6 @@
 # PhotoVault WordPress Infrastructure
 
-Ce depot racine versionne uniquement l'environnement Docker et sa documentation. Le coeur WordPress, les uploads, les plugins tiers et les quatre depots applicatifs sont volontairement ignores.
+Ce depot racine versionne uniquement l'environnement Docker et sa documentation. Le coeur WordPress, les uploads, les plugins tiers et les cinq depots applicatifs sont volontairement ignores.
 
 Le runbook canonique, depuis le choix du serveur jusqu'au rollback, est `doc/GUIDE-DEVOPS-COMPLET.md`.
 
@@ -10,6 +10,7 @@ Depots applicatifs independants:
 - wp-content/plugins/photovault-core
 - wp-content/plugins/identity-security-kit
 - wp-content/plugins/newsletter-campaign-kit
+- wp-content/plugins/trouble-ticket-connector
 
 ## Demarrage local
 
@@ -19,7 +20,7 @@ Avec GNU Make sous Linux, macOS, WSL ou Git Bash:
     make deploy
     make status
 
-Le deploiement attend les healthchecks puis verifie WordPress, le theme et les trois plugins applicatifs. `make help` affiche toutes les commandes disponibles.
+Le deploiement attend les healthchecks puis verifie WordPress, le theme et les quatre plugins applicatifs. `make help` affiche toutes les commandes disponibles.
 
 Sous PowerShell:
 
@@ -49,10 +50,12 @@ Avant un build ou une livraison, verifiez les copies integrees des plugins sans 
     make mirrors
 
 Cette commande compare les contenus (chemin et SHA-256) de `photovault-core`,
-`identity-security-kit` et `newsletter-campaign-kit` avec leurs miroirs dans le
-theme. Elle fait aussi partie de `make verify` et de la CI.
+`identity-security-kit`, `newsletter-campaign-kit` et `trouble-ticket-connector`
+avec leurs miroirs dans le theme. Elle fait aussi partie de `make verify` et de la CI.
+Les répertoires `vendor` déjà distribués sont préservés par la synchronisation et validés par leurs dépôts applicatifs;
+le synchroniseur ne les remplace pas lors d’une mise à jour de miroir.
 
-Les credentials Twilio et Resend API sont places dans `docker/wp-config-secrets.php`; le SMTP transactionnel est configure dans `.env`. Aucun secret ne doit entrer dans le Makefile, un fichier exemple ou Git. `make provider-status` indique l'etat sans afficher les valeurs. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example` refuse les providers de test, Mailpit, une home non HTTPS et les principaux en-tetes publics manquants avant la recette de reception reelle.
+Les credentials Twilio et Resend API sont places dans `docker/wp-config-secrets.php`; le SMTP transactionnel est configure dans `.env`. Aucun secret ne doit entrer dans le Makefile, un fichier exemple ou Git. `make provider-status` indique l'etat sans afficher les valeurs. Sur l'hebergement final, `make production-preflight PUBLIC_URL=https://votre-domaine.example SUPPORT_ORIGIN=https://support.example.com` refuse les providers de test, Mailpit, une home non HTTPS, une CSP qui bloque le widget et les principaux en-tetes publics manquants avant la recette de reception reelle.
 
 ## Sauvegarde et restauration
 

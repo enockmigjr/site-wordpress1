@@ -6,6 +6,7 @@
 !README.md
 !Dockerfile
 !Makefile
+!sync-plugins.php
 !docker-compose.yml
 !docker/
 !docker/**
